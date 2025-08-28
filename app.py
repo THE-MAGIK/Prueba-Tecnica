@@ -1,21 +1,23 @@
+#Codigo Angelo
 """
 Bienvenido al analizador de archivos (imagen o video) con IA de Google Gemini.
 
 Este script de Python utiliza el framework Flask para crear un servidor web.
-Su principal función es recibir archivos (imágenes o videos) que los usuarios suben
+Su principal función es recibir archivos (imágenes o videos) que los usuarios suben    
 a través de una página web, enviarlos a la API de Google Gemini para su análisis
 y devolver los resultados al usuario.
 """
-# IMPORTACIONES NECESARIAS 
+# IMPORTACIONES NECESARIAS ---- Codigo IA
 import os
 import json
 import time
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify      
 import google.generativeai as genai
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 
-# --- 1. CONFIGURACIÓN INICIAL ---
+# --- 1. CONFIGURACIÓN INICIAL ---#
+# Codigo IA
 
 # Cargamos las variables de entorno del archivo .env.
 load_dotenv()
@@ -39,6 +41,10 @@ print("DEBUG: Configuración de la API Key completada.")
 # Creamos la aplicación Flask.
 app = Flask(__name__)
 
+# Configuramos Flask para que no convierta caracteres no ASCII a secuencias de escape.
+# Esto asegura que caracteres como 'ñ', 'á', 'é', etc., se muestren correctamente en el JSON.
+app.config['JSON_AS_ASCII'] = False
+
 # Definimos el nombre de la carpeta donde guardaremos temporalmente los archivos subidos.
 UPLOAD_FOLDER = 'uploads'
 # Nos aseguramos de que esta carpeta exista. Si no, la creamos.
@@ -52,7 +58,8 @@ video_model = genai.GenerativeModel('gemini-1.5-flash')
 
 
 # FUNCIONES DE ANÁLISIS CON LA IA
-# aqui van los prompts y las funciones que llaman a la IA
+# aqui van los prompts y las funciones que llaman a la IA            
+# Codigo Angelo
 
 def analyze_image_with_ia(file_path: str):
     """
@@ -65,15 +72,21 @@ def analyze_image_with_ia(file_path: str):
         dict: Un diccionario con los resultados del análisis.
     """
     # Este es el prompt que le di para imagenes
-    
-    prompt = """
-    Analiza la siguiente imagen y proporciona únicamente un objeto JSON con las siguientes claves:
 
-        "contenido_prohibido": todo tipo de contenido prohibido, violento, sexual, odio, racismo etc.
-        "informacion_sensible": todo tipo de informacion, telefonos, correos, nombres.
+
+#Codigo Angelo
+    prompt = """                                                    
+    Analiza muy detalladamente la siguiente imagen y proporciona únicamente un objeto JSON con la siguiente clave:
+
+        "contenido_prohibido": Si la imagen tiene contenido obsceno, violento, sexual, racista o cualquier tipo de
+         contenido sensible explicar cual es con una respuesta muy puntual.
+
         "nombre_producto": El nombre comercial del producto.
+
         "marca_producto": La marca del producto.
-        "descripcion_uso": Una descripción breve y clara de para qué sirve el producto.
+
+        "informacion_sensible": Un listado con cualquier información sensible que aparezca en la imagen, como datos personales,
+        documentos de identidad, direcciones, números de teléfono o información financiera etc.
 
         Si no puedes determinar alguno de los campos, déjalo como "No determinado".
         No incluyas nada más en tu respuesta, solo el JSON."""
@@ -87,14 +100,19 @@ def analyze_image_with_ia(file_path: str):
     # 1. el prompt
     # 2. El archivo que acabamos de subir.
     # También le indicamos que queremos la respuesta en formato JSON.
+    #Codigo IA
     response = image_model.generate_content(
         [prompt, uploaded_file],
         generation_config={"response_mime_type": "application/json"}
     )
 
-    # La respuesta de la IA viene como texto. se convierte a un objeto Python
-    return json.loads(response.text)
-      # Este es el prompt que le di para videos
+    # La respuesta de la IA viene como texto. Para asegurar que los caracteres especiales
+    # se interpreten correctamente, primero se codifica a bytes y luego se decodifica
+    # usando 'unicode_escape' antes de convertirlo a un objeto Python.
+    return json.loads(response.text.encode('latin-1').decode('unicode_escape'))
+
+    #Codigo Angelo
+    # Este es el prompt que le di para videos
 def analyze_video_with_ia(file_path):
     """
     Analiza un video utilizando la IA de Gemini.
@@ -107,25 +125,29 @@ def analyze_video_with_ia(file_path):
     """
     # Al igual que con la imagen, definimos un prompt muy específico para el video.
     # Le pedimos que actúe como un sistema de moderación y nos devuelva un JSON con valores booleanos.
+    #Codigo Angelo
     prompt = """
-    Actúa como un sistema de moderación de contenido. Analiza este video y determina si contiene alguna de las siguientes categorías. 
-    Responde únicamente con un objeto JSON con las siguientes claves y valores booleanos (true/false):
+    Actúa como un sistema de moderación de contenido. Analiza muy detalladamente este video y determina si contiene alguna de las siguientes categorías. 
+    Responde únicamente con un objeto JSON con las siguientes claves:
 
-    - "tiene_contenido_obsceno": Si el video contiene desnudez, actos sexuales o lenguaje vulgar explícito.
-    - "tiene_contenido_racista": Si el video contiene insultos, símbolos o ideologías que promueven el odio racial.
-    - "tiene_informacion_personal": Si el video expone datos privados como documentos de identidad, direcciones, números de teléfono o información financiera etc.
-    - "tiene_contenido_sensible_general": Si el video contiene violencia gráfica, autolesiones, peleas intrafamiliares, peleas en fisico o cualquier otro tema perturbador no cubierto por las otras categorías.
-    - "nombre_producto": El nombre comercial del producto.
-    - "marca_producto": La marca del producto.
-    - "descripcion_uso": Una descripción breve y clara de para qué sirve el producto.
+        "contenido_prohibido": Si el video tiene contenido obsceno, violento, sexual, racista o cualquier tipo de
+         contenido sensible, mostrar un listado de cada una y explicar cual es con una respuesta muy puntual.
+
+        "nombre_producto": El nombre comercial del producto.
+
+        "marca_producto": La marca del producto.
+
+        "informacion_sensible": mostrar Un listado con cualquier información sensible que aparezca en la imagen, como datos personales,
+        documentos de identidad, direcciones, números de teléfono o información financiera etc; Mostrar esa informacion.
 
     No incluyas nada más en tu respuesta, solo el JSON.
     """
-    
+    #Codigo IA
     # Subimos el archivo de video a los servidores de Google.
     print(f"Subiendo el archivo de video: {file_path}...")
     video_file = genai.upload_file(path=file_path, display_name="Análisis de Video")
     
+    #Codigo IA
     # El procesamiento de video no es instantáneo. La API necesita tiempo para procesarlo.
     # Este bucle `while` se encarga de esperar. Cada 10 segundos, le preguntamos a la API:
     # Continuamos esperando hasta que el estado ya no sea "PROCESSING".
@@ -138,17 +160,20 @@ def analyze_video_with_ia(file_path):
     if video_file.state.name == "FAILED":
         raise ValueError("El procesamiento del video falló.")
     
+    #Codigo IA
     # Una vez que el video está listo, le pedimos al modelo que lo analice.
     print("\nVideo procesado. Generando contenido...")
     response = video_model.generate_content(
         [prompt, video_file],
         generation_config={"response_mime_type": "application/json"}
     )
-    # Finalmente, convertimos la respuesta de texto JSON a un diccionario de Python.
-    return json.loads(response.text)
+    # La respuesta de la IA viene como texto. Para asegurar que los caracteres especiales
+    # se interpreten correctamente, primero se codifica a bytes y luego se decodifica
+    # usando 'unicode_escape' antes de convertirlo a un objeto Python.
+    return json.loads(response.text.encode('latin-1').decode('unicode_escape'))
 
 #  RUTAS DE LA APLICACIÓN WEB
-
+#Codigo IA
 @app.route('/')
 def index():
     """Muestra la página principal para subir archivos."""
@@ -163,6 +188,7 @@ def upload_file():
     """
     print("Recibida solicitud de subida de archivo.")
     
+    #Codigo Angelo
     # Primero, verificamos si la solicitud realmente contiene un archivo.
     if 'file' not in request.files:
         return jsonify({"error": "No se encontró el archivo"}), 400
@@ -175,6 +201,7 @@ def upload_file():
         return jsonify({"error": "No se seleccionó ningún archivo"}), 400
     print("Archivo seleccionado:")
     
+    #Codigo IA
     # Si todo va bien y tenemos un archivo entonces procedemos.
     if file:
         # Limpiamos el nombre del archivo para evitar problemas de seguridad.
@@ -191,7 +218,7 @@ def upload_file():
         analysis_type = ""
         print("Iniciando análisis con IA...")
         
-        
+        #Codigo IA
         try:
             if file_ext in ['.png', '.jpg', '.jpeg', '.webp']:
                 analysis_type = "imagen"
@@ -216,7 +243,8 @@ def upload_file():
             response = jsonify(final_output)
             response.headers['Content-Disposition'] = f'attachment; filename=resultado_{os.path.splitext(filename)[0]}.json'
             return response
-
+        
+        #Codigo IA
         except genai.types.generation_types.BlockedPromptException as e:
             print(f"Análisis bloqueado por políticas de seguridad: {e}")
             return jsonify({"error": "El contenido fue bloqueado por las políticas de seguridad de la IA."}), 400
