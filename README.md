@@ -27,20 +27,41 @@ Este proyecto es una aplicación web construida con Flask que permite a los usua
 ![Objetos-Prohibidos-en-el-Avion](https://github.com/user-attachments/assets/143b4cb9-f5cf-4035-8896-5eb8d5f11514)
 
 ## **Resultado json:**
-<img width="517" height="507" alt="image" src="https://github.com/user-attachments/assets/34f7bec6-86ed-4e97-95ea-e92d81425e77" />
+<img width="1367" height="282" alt="image" src="https://github.com/user-attachments/assets/b72cd61a-7a88-433c-8582-92b53db862ce" />
 
-## **Ejemplo de video donde hay racismo"**
+
+## **Ejemplo de video donde hay racismo(Descargar si es necesario)**
 ## **video:**
 **Link:** https://www.youtube.com/watch?v=AeT9jJdCDuc&ab_channel=MinisteriodeIgualdad
 
+**Link de descarga:** https://www.ssyoutube.com/watch?v=AeT9jJdCDuc&ab_channel=MinisteriodeIgualdad
+
 ## **Resultado json:**
-<img width="870" height="317" alt="image" src="https://github.com/user-attachments/assets/826e1426-b3b0-4852-8c7d-fcaa7b9cc3b8" />
+<img width="1017" height="467" alt="image" src="https://github.com/user-attachments/assets/d21d29c6-6d18-474b-a92c-d1fe864f8e9c" />
+
 
 ## **Ejemplo de video donde hay racismo, violencia (pelea), informacion personal y producto (fabuloso)**
 ## **video: Es un video personal el cual no mostrare**
 
 ## **Resultado json:**
-<img width="649" height="336" alt="image" src="https://github.com/user-attachments/assets/e21db1e7-16db-4880-9083-f77a741fbf6c" />
+<img width="1031" height="485" alt="image" src="https://github.com/user-attachments/assets/64787cb7-28ce-4475-ae21-8b096e5a0c71" />
+
+## **Ejemplo de imagen descriminatoria**
+## **Imagen:**
+<img width="367" height="292" alt="image" src="https://github.com/user-attachments/assets/07db1c37-089c-43d6-b618-2da1b3a3d27c" />
+
+## **Resultado json:**
+<img width="1310" height="316" alt="image" src="https://github.com/user-attachments/assets/1aa24849-5936-498f-9d10-68df49739c97" />
+
+## **Ejemplo de imagen con informacion personal**
+## **Imagen:**
+![WhatsApp Image 2025-08-28 at 5 18 17 PM](https://github.com/user-attachments/assets/948de255-3a7f-4c6a-866a-417e2f196ecd)
+
+## **Resultado json:**
+<img width="652" height="387" alt="image" src="https://github.com/user-attachments/assets/28c9016e-55a0-47f3-b482-0ac9e702f838" />
+
+
+
 
 
 
