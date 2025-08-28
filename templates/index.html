@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador de archivos con IA</title>
+
+    <!-- enlazamos el archivo css-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!--  contenedor principal de la página -->
+    <div class="container">
+        <h1>Sube una imagen o video para analizar</h1>
+
+        <!-- El formulario que el usuario usará para subir el archivo -->
+        <form id="upload-form">
+         
+            <input type="file" name="file" accept="image/*,video/*" required>
+            <input type="submit" value="Analizar Archivo">
+        </form>
+
+        <!--indicador de carga (loader) -->
+        <div class="loader" id="loader"></div>
+
+        <!-- Este contenedor mostrará los resultados o los errores del análisis. También está oculto al principio. -->
+        <div id="results-container">
+            <h2>Resultados del Análisis</h2>
+            <!-- los resultados en tipo json -->
+            <pre id="results-json"></pre>
+        </div>
+    </div>
+
+    
+    <script>
+        // referencias de los elementos HTML 
+        const form = document.getElementById('upload-form');
+        const loader = document.getElementById('loader');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsJson = document.getElementById('results-json');
+        const submitButton = form.querySelector('input[type="submit"]');
+
+        // Manejador del evento 'submit' del formulario
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Evita que el navegador recargue la página
+
+            // Aca inicia el analisis 
+
+            // Mostramos el 'loader' para que el usuario sepa que algo está pasando.
+            loader.style.display = 'block';
+            // Deshabilitamos el botón para evitar que el usuario lo presione varias veces.
+            submitButton.disabled = true;
+            // Ocultamos cualquier resultado anterior.
+            resultsContainer.style.display = 'none';
+
+            // Creamos un objeto `FormData` a partir de nuestro formulario.
+            // Esto empaqueta el archivo seleccionado de una forma que el servidor puede entender.
+            const formData = new FormData(form);
+
+            try {
+                // `fetch` es la forma moderna de hacer peticiones de red en JavaScript.
+                // Le decimos que envíe los datos del formulario a nuestra ruta '/upload' usando el método 'POST'.
+                // `await` pausa la ejecución aquí hasta que el servidor responda.
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                // Si la respuesta del servidor no es exitosa (ej. un error 400 o 500),
+                // leemos el mensaje de error que nos envió el backend y lo lanzamos como un error de JavaScript.
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Error del servidor: ${response.status}`);
+                }
+
+                
+                // Si la respuesta fue exitosa, el servidor nos envió un archivo.
+                // `response.blob()` convierte el cuerpo de la respuesta en un objeto de archivo.
+                const blob = await response.blob();
+                // Creamos una URL temporal para este archivo en el navegador.
+                const url = window.URL.createObjectURL(blob);
+                // Creamos un enlace (`<a>`) invisible.
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+
+                // El servidor nos dijo el nombre del archivo en una cabecera 'Content-Disposition'.
+                // Aquí lo extraemos para que la descarga tenga un nombre de archivo coherente.
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = 'resultado_analisis.json';
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+                    if (filenameMatch.length > 1) {
+                        filename = filenameMatch[1];
+                    }
+                }
+                // Le asignamos el nombre al enlace de descarga.
+                a.download = filename;
+                // Añadimos el enlace a la página, hacemos clic en él programáticamente (¡esto inicia la descarga!)
+                // y luego lo eliminamos para mantener limpio el HTML.
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                // Mostramos un mensaje de éxito al usuario.
+                resultsJson.textContent = `¡Éxito! La descarga del archivo '${filename}' ha comenzado.`;
+                resultsContainer.className = ''; // Quitamos la clase de error si la tenía.
+                resultsContainer.style.display = 'block';
+
+            } catch (error) {
+                // --- ERROR EN EL ANÁLISIS ---
+                // Si algo salió mal en el bloque `try` (un error de red o un error del servidor),
+                // este bloque `catch` se ejecutará.
+                resultsJson.textContent = `Ocurrió un error:\n${error.message}`;
+                // Añadimos una clase 'error' para que el CSS pueda darle un estilo diferente (fondo rojo, etc.).
+                resultsContainer.className = 'error';
+                resultsContainer.style.display = 'block';
+            } finally {
+                // --- LIMPIEZA FINAL ---
+                // Este bloque se ejecuta SIEMPRE, tanto si hubo éxito como si hubo error.
+                // Es el lugar perfecto para volver a dejar la interfaz como al principio.
+                loader.style.display = 'none';
+                submitButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
