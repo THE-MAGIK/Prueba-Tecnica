@@ -1,13 +1,4 @@
-#Codigo Angelo
-"""
-Bienvenido al analizador de archivos (imagen o video) con IA de Google Gemini.
-
-Este script de Python utiliza el framework Flask para crear un servidor web.
-Su principal función es recibir archivos (imágenes o videos) que los usuarios suben    
-a través de una página web, enviarlos a la API de Google Gemini para su análisis
-y devolver los resultados al usuario.
-"""
-# IMPORTACIONES NECESARIAS ---- Codigo IA
+# IMPORTACIONES NECESARIAS 
 import os
 import json
 import time
@@ -16,8 +7,8 @@ import google.generativeai as genai
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 
-# --- 1. CONFIGURACIÓN INICIAL ---#
-# Codigo IA
+
+# todo respecto a la key fue sacado de documentacion e implementado con IA a este codigo 
 
 # Cargamos las variables de entorno del archivo .env.
 load_dotenv()
@@ -53,13 +44,14 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # se preparan los modelos de IA que se utilizaran, en este caso es el geminmi 1.5-flash ya que funciona muy bien para los dos
+#se saco de documentacion de google generative ai
 image_model = genai.GenerativeModel('gemini-1.5-flash')
 video_model = genai.GenerativeModel('gemini-1.5-flash')
 
 
-# FUNCIONES DE ANÁLISIS CON LA IA
+
 # aqui van los prompts y las funciones que llaman a la IA            
-# Codigo Angelo
+
 
 def analyze_image_with_ia(file_path: str):
     """
@@ -74,7 +66,7 @@ def analyze_image_with_ia(file_path: str):
     # Este es el prompt que le di para imagenes
 
 
-#Codigo Angelo
+    #prompt Angelo
     prompt = """                                                    
     Analiza muy detalladamente la siguiente imagen y proporciona únicamente un objeto JSON con la siguiente clave:
 
@@ -90,7 +82,8 @@ def analyze_image_with_ia(file_path: str):
 
         Si no puedes determinar alguno de los campos, déjalo como "No determinado".
         No incluyas nada más en tu respuesta, solo el JSON."""
-
+    
+    #Codigo IA
     # Primero, subimos el archivo a los servidores de Google. La API no trabaja
     # directamente con archivos locales, así que este paso es necesario.
     print(f"Subiendo y preparando la imagen: {file_path}")
@@ -111,7 +104,7 @@ def analyze_image_with_ia(file_path: str):
     # usando 'unicode_escape' antes de convertirlo a un objeto Python.
     return json.loads(response.text.encode('latin-1').decode('unicode_escape'))
 
-    #Codigo Angelo
+
     # Este es el prompt que le di para videos
 def analyze_video_with_ia(file_path):
     """
@@ -124,8 +117,9 @@ def analyze_video_with_ia(file_path):
         dict: Un diccionario con los resultados del análisis de moderación.
     """
     # Al igual que con la imagen, definimos un prompt muy específico para el video.
-    # Le pedimos que actúe como un sistema de moderación y nos devuelva un JSON con valores booleanos.
-    #Codigo Angelo
+   
+
+    #prompt Angelo
     prompt = """
     Actúa como un sistema de moderación de contenido. Analiza muy detalladamente este video y determina si contiene alguna de las siguientes categorías. 
     Responde únicamente con un objeto JSON con las siguientes claves:
@@ -173,7 +167,8 @@ def analyze_video_with_ia(file_path):
     return json.loads(response.text.encode('latin-1').decode('unicode_escape'))
 
 #  RUTAS DE LA APLICACIÓN WEB
-#Codigo IA
+#Codigo angelo
+#Aqui llamamos al front 
 @app.route('/')
 def index():
     """Muestra la página principal para subir archivos."""
@@ -272,6 +267,5 @@ def upload_file():
 
 # Este es el punto de entrada estándar para una aplicación Python.
 # Si ejecutamos `python app.py`, se iniciará el servidor de desarrollo de Flask.
-# `debug=True` hace que el servidor se reinicie automáticamente cuando cambiamos el código.
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)
